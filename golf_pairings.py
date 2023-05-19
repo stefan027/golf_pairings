@@ -38,7 +38,7 @@ def draw_foursome(available_players):
     for _ in range(4):
         player, available_players = draw_player(available_players)
         foursome.append(player)
-    return foursome[:2], foursome[2:], available_players
+    return sorted(foursome[:2]), sorted(foursome[2:]), available_players
 
 
 run = st.button(
@@ -69,6 +69,8 @@ if run:
                 players = list(range(num_players))
                 for g in range(num_groups):
                     pair1, pair2, players = draw_foursome(players)
+                    counts_pairs[pair1[0], pair1[1]] += 1
+                    counts_pairs[pair2[0], pair2[1]] += 1
                     group = sorted(pair1 + pair2)
                     for g1 in range(4):
                         for g2 in range(g1+1, 4, 1):
