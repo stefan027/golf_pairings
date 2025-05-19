@@ -12,10 +12,15 @@ st.markdown("")
 
 if 'has_result' not in st.session_state:
     st.session_state.has_result = False
+    st.session_state.is_running = False
 
 
 def clear_result():
     st.session_state.has_result = False
+
+def set_run_state():
+    st.session_state.has_result = False
+    st.session_state.is_running = True
 
 
 num_players = st.number_input(
@@ -42,13 +47,14 @@ def draw_foursome(available_players):
 
 
 run = st.button(
-    "Begin", on_click=clear_result, use_container_width=True
+    "Begin", on_click=set_run_state, use_container_width=True,
+    disabled=st.session_state.is_running, type="primary"
 )
 stop = st.button(
-    "Stop", use_container_width=True
+    "Stop", use_container_width=True, disabled=not run,
 )
 
-if run:
+if st.session_state.is_running:
     min_pair_matches = 1e4
     min_group_matches = 1e4
     min_group_max = 1e4
@@ -95,16 +101,18 @@ if run:
                 new_best = True
             if new_best:
                 with info_box.container():
-                    st.caption("New best combination found!")
-                    st.caption(f"Pair matches: {pair_matches}")
-                    st.caption(f"Max group matches: {group_max}")
+                    st.caption("Nuwe beste kombinasie gevind!")
+                    st.caption(f"Aantal tweebal herhalings: {pair_matches}")
+                    st.caption(f"Aantal vierbal herhalings: {group_max}")
                 min_pair_matches = pair_matches
                 min_group_matches = group_matches
                 min_group_max = group_max
                 st.session_state.tee_sheet = deepcopy(curr_tee_sheet)
                 st.session_state.has_result = True
+    st.session_state.is_running = False
+    st.rerun()
 
-if st.session_state.has_result:
+if not st.session_state.is_running and st.session_state.has_result:
     df = pd.DataFrame(
         st.session_state.tee_sheet.reshape((num_groups*num_rounds, 4)),
         columns=[f"Speler {i+1}" for i in range(4)]
